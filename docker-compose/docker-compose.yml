@@ -1,0 +1,40 @@
+version: "3.7"
+
+services:
+  contacts-client:
+    container_name: contacts-client
+    build: ./client
+    depends_on:
+      - contacts-server
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./client/:/client/
+      - /client/node_modules
+
+  contacts-server:
+    container_name: contacts-server
+    build: ./server/
+    depends_on:
+      - contacts-db
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./server/:/server/
+    env_file: .env
+
+  contacts-db:
+    container_name: contacts-db
+    image: mysql:8.0
+    platform: linux/x86_64 # this field is required for Mac m1 users
+    restart: on-failure
+    expose:
+      - "3306"
+    volumes:
+      - ./database/data:/var/lib/mysql
+      - ./database/init-scripts:/docker-entrypoint-initdb.d
+    environment:
+      MYSQL_ROOT_PASSWORD: "mypassword123"
+      MYSQL_DATABASE: "contacts"
+      MYSQL_USER: "fastapiserver"
+      MYSQL_PASSWORD: "mypassword123again"
